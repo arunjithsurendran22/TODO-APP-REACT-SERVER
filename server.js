@@ -32,7 +32,7 @@ mongoose
 
 // Route for root endpoint
 app.get("/", (req, res) => {
-  res.json("Welcome");
+  res.send("Welcome");
 });
 
 // Routing
