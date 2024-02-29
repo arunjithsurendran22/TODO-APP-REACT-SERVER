@@ -13,14 +13,12 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
-// CORS configuration
-const allowedOrigins = ['https://todo-app-react-blond.vercel.app/', 'https://todo-app-react-djdewl39g-selfstack.vercel.app/'];
-app.use(
-  cors({
-    origin: allowedOrigins,
-    credentials: true,
-  })
-);
+// CORS configuration allowing requests from any origin
+app.use(cors({
+  origin: '*',
+  credentials: true,
+}));
+
 
 // Database connection
 mongoose
