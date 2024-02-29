@@ -32,6 +32,11 @@ mongoose
     console.log(error, "Database disconnected.....");
   });
 
+// Route for root endpoint
+app.get("/", (req, res) => {
+  res.json("Welcome");
+});
+
 // Routing
 app.use("/api/v2", todoRoute);
 
