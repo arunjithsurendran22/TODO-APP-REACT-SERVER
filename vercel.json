@@ -1,0 +1,15 @@
+{
+    "version": 2,
+    "name": "my-vercel-project",
+    "builds": [
+        { "src": ".js", "use": "@vercel/static-build" }
+    ],
+    "routes": [
+        { "src": "/(.*)", "dest": "/" }
+    ],
+    "env": {
+        "MONGODB_URI": "mongodb+srv://arunjithsurendran22:aFYsftPqukEl6EVl@cluster9432.ncyvrj8.mongodb.net/TODO?retryWrites=true&w=majority",
+        "USER_JWT_SECRET": "myuserjwtsecret",
+        "USER_REFRESH_TOKEN_SECRET": "userrefreshtokensecret"
+    }
+}
