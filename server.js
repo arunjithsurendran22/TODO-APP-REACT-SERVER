@@ -14,7 +14,7 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
 // CORS configuration
-const allowedOrigins = ['https://todo-app-react-blond.vercel.app/', 'https://todo-app-react-djdewl39g-selfstack.vercel.app'];
+const allowedOrigins = ['https://todo-app-react-blond.vercel.app/', 'https://todo-app-react-djdewl39g-selfstack.vercel.app/'];
 app.use(
   cors({
     origin: allowedOrigins,
