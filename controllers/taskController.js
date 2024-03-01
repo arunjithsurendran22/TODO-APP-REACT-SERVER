@@ -281,6 +281,14 @@ const completeTask = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+const welcome =async(req,res,next)=>{
+  try{
+    res.status(200).json({message:"welcome"})
+  }catch(error){
+    res.status(500).json(message:"Internal Server Error")
+  }
+}
 export {
   registerUser,
   loginUser,
@@ -289,4 +297,5 @@ export {
   updateTask,
   deleteTask,
   completeTask,
+  welcome,
 };

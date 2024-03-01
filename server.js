@@ -31,9 +31,7 @@ mongoose
   });
 
 // Route for root endpoint
-app.get("/", (req, res) => {
-  res.send("Welcome");
-});
+
 
 // Routing
 app.use("/api/v2", todoRoute);
