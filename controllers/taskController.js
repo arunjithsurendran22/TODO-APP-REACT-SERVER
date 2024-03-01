@@ -286,7 +286,7 @@ const welcome =async(req,res,next)=>{
   try{
     res.status(200).json({message:"welcome"})
   }catch(error){
-    res.status(500).json(message:"Internal Server Error")
+    res.status(500).json({message:"Internal Server Error"})
   }
 }
 export {
