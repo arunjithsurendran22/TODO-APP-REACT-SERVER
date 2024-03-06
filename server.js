@@ -18,6 +18,10 @@ app.use(cors({
   origin: '*',
   credentials: true,
 }));
+app.get('/', (req, res) => {
+  res.send("Welcome");
+});
+
 
 
 // Database connection
