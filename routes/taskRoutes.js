@@ -3,12 +3,14 @@ import express from "express";
 import {
   registerUser,
   loginUser,
+  getUserProfile,
   createTask,
   getTasks,
   updateTask,
   deleteTask,
   completeTask,
-  welcome,
+  updateStatus,
+  logoutUser,
 } from "../controllers/taskController.js";
 import { userAuthenticate } from "../middleware/userAuthMiddleware.js";
 
@@ -16,11 +18,14 @@ const router = express.Router();
 
 router.post("/register", registerUser);
 router.post("/login", loginUser);
+router.get("/profile/get", userAuthenticate, getUserProfile);
 router.post("/create", userAuthenticate, createTask);
 router.get("/get", userAuthenticate, getTasks);
-router.put("/edit/:Id", userAuthenticate, updateTask);
-router.delete("/delete/:Id", userAuthenticate, deleteTask);
-router.put("/complete/:Id", userAuthenticate, completeTask);
+router.put("/update/:id", userAuthenticate, updateTask);
+router.delete("/delete/:id", userAuthenticate, deleteTask);
+router.put("/complete/:id", userAuthenticate, completeTask);
+router.put("/tasks/:id", userAuthenticate, updateStatus);
+router.post("/logout", userAuthenticate, logoutUser);
 
-router.get("/test", welcome);
+
 export default router;

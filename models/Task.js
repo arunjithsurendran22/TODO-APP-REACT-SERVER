@@ -15,12 +15,17 @@ const taskSchema = new mongoose.Schema({
   },
   todo: [
     {
-      title: {
+      id: {
         type: String,
       },
-      completed: {
-        type: Boolean,
-        default: false,
+      name: {
+        type: String,
+        required: true,
+      },
+      status: {
+        type: String,
+        enum: ["todo", "inprogress", "closed"],
+        default: "todo",
       },
     },
   ],

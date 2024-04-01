@@ -125,43 +125,81 @@ const loginUser = async (req, res, next) => {
   }
 };
 
+//GET:profile data
+const getUserProfile = async (req, res, next) => {
+  try {
+    const userId = req.userId;
+    // Find the user by ID
+    const user = await TaskModal.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Extract relevant profile data
+    const userProfile = {
+      name: user.name,
+      email: user.email,
+    };
+    // Return the user's profile data
+    return res.status(200).json({ userProfile });
+  } catch (error) {
+    next(error);
+    console.log(error, "error for getting profile");
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 // Create a new task
 const createTask = async (req, res) => {
   try {
-    const { title } = req.body;
-    const userId = req.userId; // Assuming userId is obtained from authentication middleware
+    const { name, id } = req.body;
+    const userId = req.userId;
 
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    // Find the task associated with the userId
-    const task = await TaskModal.findById(userId);
+    // Find the user by ID
+    let user = await TaskModal.findById(userId);
 
-    if (!task) {
-      return res.status(404).json({ message: "Task not found for the user" });
+    if (!user) {
+      // If user not found, return unauthorized
+      return res.status(401).json({ message: "Unauthorized" });
     }
 
-    // Create a new task associated with the userId
+    // Create a new task
     const newTask = {
-      title,
+      id,
+      name,
     };
 
-    task.todo.push(newTask);
-    await task.save();
+    // Push the new task into the todo array of the user
+    user.todo.push(newTask);
+
+    // Save the updated user document
+    await user.save();
+
     res.status(201).json(newTask);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 };
+
 const getTasks = async (req, res) => {
-  const userId = req.userId;
-
-  if (!userId) {
-    return res.status(401).json({ message: "Unauthorized" });
-  }
-
   try {
+    const userId = req.userId;
+
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    let user = await TaskModal.findById(userId);
+
+    if (!user) {
+      // If user not found, return unauthorized
+      return res.status(401).json({ message: "todo not found" });
+    }
     // Find all tasks associated with the userId
     const tasks = await TaskModal.findById(userId);
 
@@ -172,12 +210,48 @@ const getTasks = async (req, res) => {
   }
 };
 
+//put:update task status
+const updateStatus = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const userId = req.userId;
+
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    // Find the user task by user ID
+    const userTask = await TaskModal.findOne({ _id: userId });
+
+    if (!userTask) {
+      return res.status(404).json({ message: "User task not found" });
+    }
+    // Find the task within the user's todo list by task ID
+    const taskToUpdate = userTask.todo.find((task) => task.id === id);
+
+    if (!taskToUpdate) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+    // Update the task status
+    taskToUpdate.status = status;
+    // Save the updated user task data
+    await userTask.save();
+    res.status(200).json({
+      message: "Task status updated successfully",
+      task: taskToUpdate,
+    });
+  } catch (error) {
+    console.error("Error updating task status:", error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 // Update a task
 const updateTask = async (req, res) => {
   try {
-    const { Id } = req.params;
+    const { id } = req.params;
     const userId = req.userId;
-    const { title, completed } = req.body;
+    const { name } = req.body;
 
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
@@ -191,19 +265,16 @@ const updateTask = async (req, res) => {
 
     // Find the task with the given ID in the user's todo list
     const taskToUpdate = userData.todo.find(
-      (task) => task._id.toString() === Id
+      (task) => task.id.toString() === id
     );
 
     if (!taskToUpdate) {
       return res.status(404).json({ message: "Task not found" });
     }
 
-    // Update the task properties
-    if (title) {
-      taskToUpdate.title = title;
-    }
-    if (completed !== undefined) {
-      taskToUpdate.completed = completed;
+    // Update the task name
+    if (name) {
+      taskToUpdate.name = name;
     }
 
     // Save the updated user data
@@ -221,7 +292,7 @@ const updateTask = async (req, res) => {
 // Delete a task
 const deleteTask = async (req, res) => {
   try {
-    const { Id } = req.params; 
+    const { id } = req.params;
     const userId = req.userId;
 
     if (!userId) {
@@ -236,7 +307,7 @@ const deleteTask = async (req, res) => {
 
     // Find the index of the task with the given ID in the user's todo list
     const taskIndex = userData.todo.findIndex(
-      (task) => task._id.toString() === Id
+      (task) => task.id.toString() === id // Use lowercase 'id' instead of 'Id', and convert it to string for comparison
     );
 
     if (taskIndex === -1) {
@@ -257,17 +328,17 @@ const deleteTask = async (req, res) => {
 
 const completeTask = async (req, res) => {
   const { Id } = req.params; // Extract task id from request parameters
-  const userId =req.userId
+  const userId = req.userId;
   try {
     // Find the task by id
     const task = await TaskModal.findById(userId);
-    
+
     if (!task) {
-      return res.status(404).json({ message: 'Task not found' });
+      return res.status(404).json({ message: "Task not found" });
     }
 
     // Toggle the completion status
-    task.todo.forEach(todoItem => {
+    task.todo.forEach((todoItem) => {
       if (todoItem._id.toString() === Id) {
         todoItem.completed = !todoItem.completed;
       }
@@ -282,20 +353,28 @@ const completeTask = async (req, res) => {
   }
 };
 
-const welcome =async(req,res,next)=>{
-  try{
-    res.status(200).json({message:"welcome"})
-  }catch(error){
-    res.status(500).json({message:"Internal Server Error"})
+// Logout controller
+const logoutUser = async (req, res, next) => {
+  try {
+    res.clearCookie("accessTokenUser"); // Clear access token cookie
+    res.removeHeader("authorization"); // Remove access token from response header
+
+    return res.status(200).json({ message: "User logged out successfully" });
+  } catch (error) {
+    next(error);
+    console.error("Logout failed:", error.message);
+    return res.status(500).json({ message: "Internal server error" });
   }
-}
+};
 export {
   registerUser,
   loginUser,
+  getUserProfile,
   createTask,
   getTasks,
   updateTask,
+  updateStatus,
   deleteTask,
   completeTask,
-  welcome,
+  logoutUser,
 };
